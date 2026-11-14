@@ -5,6 +5,7 @@ PIPE_BENCH_SRC = src/baseline/pipe_bench.c
 METRICS_SRC = src/common/bench_metrics.c
 PIPE_BENCH_BIN = $(BUILD_DIR)/pipe_bench
 .PHONY: all clean
+
 all: $(PIPE_BENCH_BIN)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -12,3 +13,11 @@ $(PIPE_BENCH_BIN): $(PIPE_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/
 	$(CC) $(CFLAGS) $(PIPE_BENCH_SRC) $(METRICS_SRC) -o $(PIPE_BENCH_BIN)
 clean:
 	rm -rf $(BUILD_DIR)
+
+MQ_BENCH_SRC = src/baseline/mq_bench.c
+MQ_BENCH_BIN = $(BUILD_DIR)/mq_bench
+
+all: $(MQ_BENCH_BIN)
+
+$(MQ_BENCH_BIN): $(MQ_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(MQ_BENCH_SRC) $(METRICS_SRC) -o $(MQ_BENCH_BIN)

@@ -1,3 +1,5 @@
+// 1단계 IPC - Pipe
+
 #define _POSIX_C_SOURCE 200809L
 #include <errno.h>
 #include <fcntl.h>
