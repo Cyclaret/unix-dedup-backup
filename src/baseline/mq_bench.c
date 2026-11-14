@@ -29,6 +29,7 @@
 #define IO_TIMEOUT_MS 30000
 #define RUN_TIMEOUT_SEC 600
 #define SHUTDOWN_GRACE_MS 2000
+#define CONTROL_TIMEOUT_MS 600000
 
 typedef struct
 {
@@ -144,7 +145,7 @@ static int io_all(int fd, void *buffer, size_t size, int writing)
     int64_t now = monotonic_ms();
     if (now < 0)
         return -1;
-    int64_t deadline = now + IO_TIMEOUT_MS;
+    int64_t deadline = now + CONTROL_TIMEOUT_MS;
 
     while (size > 0)
     {
@@ -196,6 +197,7 @@ static int mq_send_all(int qid, const void *buffer, size_t size)
 {
     const unsigned char *p = buffer;
     int64_t deadline = monotonic_ms() + IO_TIMEOUT_MS;
+    size_t total = size;
     while (size > 0)
     {
         mq_packet_t packet;
@@ -206,6 +208,7 @@ static int mq_send_all(int qid, const void *buffer, size_t size)
         {
             p += n;
             size -= n;
+            deadline = monotonic_ms() + IO_TIMEOUT_MS;
             continue;
         }
         if (errno == EINTR)
@@ -214,6 +217,7 @@ static int mq_send_all(int qid, const void *buffer, size_t size)
             return -1;
         if (monotonic_ms() >= deadline)
         {
+            fprintf(stderr, "[MQ DIAG] send stalled qid=%d sent=%zu/%zu bytes\n", qid, total - size, total);
             errno = ETIMEDOUT;
             return -1;
         }
@@ -248,6 +252,7 @@ static int mq_recv_all(int qid, void *buffer, size_t size)
 {
     unsigned char *p = buffer;
     int64_t deadline = monotonic_ms() + IO_TIMEOUT_MS;
+    size_t total = size;
     while (size > 0)
     {
         size_t n = size < MQ_FRAGMENT ? size : MQ_FRAGMENT;
@@ -258,10 +263,12 @@ static int mq_recv_all(int qid, void *buffer, size_t size)
         {
             p += n;
             size -= n;
+            deadline = monotonic_ms() + IO_TIMEOUT_MS;
             continue;
         }
         if (monotonic_ms() >= deadline)
         {
+            fprintf(stderr, "[MQ DIAG] receive stalled qid=%d received=%zu/%zu bytes\n", qid, total - size, total);
             errno = ETIMEDOUT;
             return -1;
         }
@@ -344,6 +351,7 @@ static int server_phase(server_arg_t *a, unsigned char *buf, int count, int meas
         {
             if (monotonic_ms() - last_progress >= IO_TIMEOUT_MS)
             {
+                fprintf(stderr, "[MQ DIAG] server idle timeout worker=%d remaining=%llu\n", a->worker_id, (unsigned long long)remaining);
                 errno = ETIMEDOUT;
                 return -1;
             }
