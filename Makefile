@@ -1,29 +1,38 @@
 CC = gcc
 CFLAGS = -O2 -Wall -Wextra -std=c11 -pthread -Iinclude
+
 BUILD_DIR = build
-PIPE_BENCH_SRC = src/baseline/pipe_bench.c
 METRICS_SRC = src/common/bench_metrics.c
+
+PIPE_BENCH_SRC = src/baseline/pipe_bench.c
+MQ_BENCH_SRC = src/baseline/mq_bench.c
+SHM_BENCH_SRC = src/baseline/shm_bench.c
+
 PIPE_BENCH_BIN = $(BUILD_DIR)/pipe_bench
+MQ_BENCH_BIN = $(BUILD_DIR)/mq_bench
+SHM_BENCH_BIN = $(BUILD_DIR)/shm_bench
+
 .PHONY: all clean
 
-all: $(PIPE_BENCH_BIN)
+# Build all IPC benchmarks
+all: $(PIPE_BENCH_BIN) $(MQ_BENCH_BIN) $(SHM_BENCH_BIN)
+
+# Create build directory
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+
+# Pipe benchmark
 $(PIPE_BENCH_BIN): $(PIPE_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(PIPE_BENCH_SRC) $(METRICS_SRC) -o $(PIPE_BENCH_BIN)
-clean:
-	rm -rf $(BUILD_DIR)
 
-MQ_BENCH_SRC = src/baseline/mq_bench.c
-MQ_BENCH_BIN = $(BUILD_DIR)/mq_bench
-
-all: $(MQ_BENCH_BIN)
-
+# Message Queue benchmark
 $(MQ_BENCH_BIN): $(MQ_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(MQ_BENCH_SRC) $(METRICS_SRC) -o $(MQ_BENCH_BIN)
 
-SHM_BENCH_SRC = src/baseline/shm_bench.c
-SHM_BENCH_BIN = $(BUILD_DIR)/shm_bench
-
+# Shared Memory benchmark
 $(SHM_BENCH_BIN): $(SHM_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SHM_BENCH_SRC) $(METRICS_SRC) -o $(SHM_BENCH_BIN)
+
+# Clean build files
+clean:
+	rm -rf $(BUILD_DIR)
