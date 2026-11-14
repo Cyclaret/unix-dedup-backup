@@ -1,38 +1,14 @@
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -std=c11 -Iinclude
-
+CFLAGS = -O2 -Wall -Wextra -std=c11 -pthread -Iinclude
 BUILD_DIR = build
-
-COMMON_SRC = src/common/benchmark.c
-COMMON_OBJ = $(BUILD_DIR)/benchmark.o
-
-PIPE_SRC = src/baseline/pipe_test.c
-PIPE_BIN = $(BUILD_DIR)/pipe_test
-
-MQ_SRC = src/baseline/mq_test.c
-MQ_BIN = $(BUILD_DIR)/mq_test
-
-SHM_SRC = src/baseline/shm_test.c
-SHM_BIN = $(BUILD_DIR)/shm_test
-
+PIPE_BENCH_SRC = src/baseline/pipe_bench.c
+METRICS_SRC = src/common/bench_metrics.c
+PIPE_BENCH_BIN = $(BUILD_DIR)/pipe_bench
 .PHONY: all clean
-
-all: $(PIPE_BIN) $(MQ_BIN) $(SHM_BIN)
-
+all: $(PIPE_BENCH_BIN)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
-
-$(COMMON_OBJ): $(COMMON_SRC) include/benchmark.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $(COMMON_SRC) -o $(COMMON_OBJ)
-
-$(PIPE_BIN): $(PIPE_SRC) $(COMMON_OBJ) include/common.h
-	$(CC) $(CFLAGS) $(PIPE_SRC) $(COMMON_OBJ) -o $(PIPE_BIN)
-
-$(MQ_BIN): $(MQ_SRC) $(COMMON_OBJ) include/common.h
-	$(CC) $(CFLAGS) $(MQ_SRC) $(COMMON_OBJ) -o $(MQ_BIN)
-
-$(SHM_BIN): $(SHM_SRC) $(COMMON_OBJ) include/common.h
-	$(CC) $(CFLAGS) $(SHM_SRC) $(COMMON_OBJ) -o $(SHM_BIN)
-
+$(PIPE_BENCH_BIN): $(PIPE_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(PIPE_BENCH_SRC) $(METRICS_SRC) -o $(PIPE_BENCH_BIN)
 clean:
 	rm -rf $(BUILD_DIR)
