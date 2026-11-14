@@ -19,7 +19,7 @@ STEP 1	IPC 기본 성능 비교 및 분석	완료
 STEP 2	중복 제거 백업 서버 구현 및 성능 평가	예정
 
 2. 프로젝트 구조
-
+```text
 unix-dedup-backup/
 ├── include/
 │   ├── bench_metrics.h
@@ -40,7 +40,7 @@ unix-dedup-backup/
 ├── build/
 ├── Makefile
 └── README.md
-
+```
 build/는 컴파일 시 생성되며 Git 추적 대상에서 제외한다.
 
 3. 개발 환경
