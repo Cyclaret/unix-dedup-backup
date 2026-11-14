@@ -21,3 +21,9 @@ all: $(MQ_BENCH_BIN)
 
 $(MQ_BENCH_BIN): $(MQ_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(MQ_BENCH_SRC) $(METRICS_SRC) -o $(MQ_BENCH_BIN)
+
+SHM_BENCH_SRC = src/baseline/shm_bench.c
+SHM_BENCH_BIN = $(BUILD_DIR)/shm_bench
+
+$(SHM_BENCH_BIN): $(SHM_BENCH_SRC) $(METRICS_SRC) include/ipc_bench.h include/bench_metrics.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(SHM_BENCH_SRC) $(METRICS_SRC) -o $(SHM_BENCH_BIN)
