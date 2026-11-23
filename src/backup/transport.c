@@ -7,6 +7,7 @@
 #include <sys/shm.h>
 #include <unistd.h>
 #if BACKEND == 1
+#include <sys/uio.h>
 static int up[MAX_LANES][2], down[MAX_LANES][2];
 static void transfer(int fd, void *buf, size_t len, int sending) {
     unsigned char *p = buf;
@@ -40,8 +41,29 @@ void transport_role(int client) {
 }
 void transport_cleanup(void) {}
 void upload(Request r, const unsigned char *p) {
+#ifdef PIPE_WRITEV
+    struct iovec parts[2] = {{&r, sizeof r}, {(void *)p, r.length}};
+    int first = 0;
+    while (first < 2) {
+        ssize_t n = writev(up[r.lane][1], parts + first, 2 - first);
+        if (n < 0 && errno == EINTR)
+            continue;
+        if (n <= 0)
+            fail("pipe writev");
+        size_t sent = (size_t)n;
+        while (first < 2 && sent >= parts[first].iov_len) {
+            sent -= parts[first].iov_len;
+            first++;
+        }
+        if (first < 2) {
+            parts[first].iov_base = (char *)parts[first].iov_base + sent;
+            parts[first].iov_len -= sent;
+        }
+    }
+#else
     transfer(up[r.lane][1], &r, sizeof r, 1);
     transfer(up[r.lane][1], (void *)p, r.length, 1);
+#endif
 }
 Request receive_chunk(int i, unsigned char *p) {
     Request r;
@@ -59,7 +81,9 @@ Ack receive_ack(int i) {
 }
 #elif BACKEND == 2
 /* FIFO ordering within each message type preserves fragment order. */
+#ifndef FRAGMENT
 #define FRAGMENT 4096
+#endif
 struct Message {
     long type;
     unsigned char bytes[FRAGMENT];

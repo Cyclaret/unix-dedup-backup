@@ -47,5 +47,9 @@ backup: build/pipe_backup build/mq_backup build/shm_backup
 build/pipe_backup: BACKEND_ID=1
 build/mq_backup: BACKEND_ID=2
 build/shm_backup: BACKEND_ID=3
-build/pipe_backup build/mq_backup build/shm_backup: $(BACKUP_SRC) $(BACKUP_HEADERS) | $(BUILD_DIR)
-	$(CC) -std=gnu11 -O2 -Wall -Wextra -pthread -DBACKEND=$(BACKEND_ID) $(BACKUP_SRC) -l:libcrypto.so.3 -o $@
+build/pipe_writev_backup: BACKEND_ID=1
+build/pipe_writev_backup: EXTRA_FLAGS=-DPIPE_WRITEV
+build/mq_8k_backup: BACKEND_ID=2
+build/mq_8k_backup: EXTRA_FLAGS=-DFRAGMENT=8192
+build/pipe_backup build/mq_backup build/shm_backup build/pipe_writev_backup build/mq_8k_backup: $(BACKUP_SRC) $(BACKUP_HEADERS) | $(BUILD_DIR)
+	$(CC) -std=gnu11 -O2 -Wall -Wextra -pthread $(EXTRA_FLAGS) -DBACKEND=$(BACKEND_ID) $(BACKUP_SRC) -l:libcrypto.so.3 -o $@
