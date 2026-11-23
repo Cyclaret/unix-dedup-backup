@@ -1,0 +1,4 @@
+ipc,chunk_bytes,clients,requests_per_worker,duplicate_percent,lock,trial,requests,input_bytes,unique_chunks,stored_bytes,elapsed_s,requests_s,mib_s,mean_us,median_us,p99_us,max_us,lock_wait_us,client_user_s,client_sys_s,client_nvcsw,client_nivcsw,client_rss_sum_kib,server_user_s,server_sys_s,server_nvcsw,server_nivcsw,server_rss_kib
+mq,4096,2,10,50,global,1,60,245760,30,122880,0.001041764,57594.618,224.979,93.043,38.727,553.713,553.713,254.354,0.000447,0.000000,68,34,3792,0.001274,0.000000,138,24,4364
+shm,4096,2,10,50,global,1,60,245760,30,122880,0.001183881,50680.769,197.972,72.242,17.207,777.991,777.991,6.086,0.000408,0.000000,49,23,3800,0.001156,0.000000,145,34,4380
+pipe,4096,2,10,50,global,1,60,245760,30,122880,0.001910041,31412.938,122.707,182.448,44.185,1467.237,1467.237,111.789,0.000580,0.000000,67,39,3752,0.002798,0.000000,199,31,4372
